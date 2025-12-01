@@ -3,6 +3,7 @@ import json
 import os
 import sys
 import urllib.parse
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import mapbox_vector_tile
@@ -86,6 +87,19 @@ def summarize_layers(tile: Dict[str, Any], max_features: int = 3) -> None:
 
         if len(features) > max_features:
             print(f"  ... {len(features) - max_features} more features omitted ...")
+
+
+def save_all_features(tile: Dict[str, Any], output_path: str) -> None:
+    """Persist every decoded feature to a JSON file."""
+    if not tile:
+        print("No layers to save; skipping write.")
+        return
+
+    path = Path(output_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as f:
+        json.dump(tile, f, ensure_ascii=False, indent=2)
+    print(f"\nSaved all decoded features to {path}")
 
 
 def truncate_geometry(geom: Any, max_coords: int) -> Any:
@@ -226,6 +240,11 @@ def main() -> None:
         default=10,
         help="Max number of coordinate elements to include per geometry (used with --print-geometry).",
     )
+    parser.add_argument(
+        "--save-json",
+        default=None,
+        help="Path to write all decoded features as JSON.",
+    )
     args = parser.parse_args()
 
     try:
@@ -241,6 +260,8 @@ def main() -> None:
         decoded = decode_tile(raw_tile)
         summarize_layers(decoded, max_features=args.max_features)
         # print_selected_fields(decoded)
+        if args.save_json:
+            save_all_features(decoded, args.save_json)
         if args.print_geometry:
             print_geometries(
                 decoded,
