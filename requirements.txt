@@ -1,0 +1,8 @@
+# Core HTTP client
+requests
+
+# Env config loader
+python-dotenv
+
+# Mapbox Vector Tile decoding
+mapbox-vector-tile
