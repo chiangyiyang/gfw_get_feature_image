@@ -4,3 +4,6 @@ env
 
 __pycache__
 
+images
+img_urls.json
+features.json
